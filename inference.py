@@ -3,8 +3,6 @@ import datetime
 import argparse
 
 from scripts.inference_controlnet import inference_controlnet
-from scripts.inference_lora import inference_lora
-from scripts.inference_ctrlnet_tile import inference_ctrlnet_tile
 
 
 def parse_args(input_args=None):
@@ -111,10 +109,6 @@ def run_inference(args):
 
     if args.plugin_type == "controlnet":
         inference_controlnet(args)
-    elif args.plugin_type == "controlnet_tile":
-        inference_ctrlnet_tile(args)
-    elif args.plugin_type == "lora":
-        inference_lora(args)
     else:
         raise NotImplementedError("not implemented yet")
 
