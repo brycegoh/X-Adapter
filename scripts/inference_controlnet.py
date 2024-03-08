@@ -5,7 +5,6 @@ import numpy as np
 import cv2
 import matplotlib
 from tqdm import tqdm
-from diffusers import DiffusionPipeline
 from diffusers import DPMSolverMultistepScheduler
 from diffusers.utils import load_image
 from torch import Generator
