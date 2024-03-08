@@ -100,6 +100,10 @@ def parse_args(input_args=None):
         "--control_guidance_end",
         type=float, default=1.0
     )
+    parser.add_argument(
+        "--guidance_scale",
+        type=float, default=5.0
+    )
 
     if input_args is not None:
         args = parser.parse_args(input_args)

@@ -369,6 +369,7 @@ def inference_controlnet(args):
                                  adapter_guidance_start=adapter_guidance_start,
                                  control_guidance_start = args.control_guidance_start,
                                  control_guidance_end = args.control_guidance_end,
+                                 guidance_scale = args.guidance_scale,
                             ).images[0]
                         img.save(
                             f"{args.save_path}/{prompt[:10]}_{i}_ccs_{controlnet_condition_scale:.2f}_ags_{adapter_guidance_start:.2f}_acs_{adapter_condition_scale:.2f}.png")
