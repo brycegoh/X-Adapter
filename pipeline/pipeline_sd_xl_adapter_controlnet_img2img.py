@@ -25,7 +25,6 @@ from transformers import CLIPTextModel, CLIPTextModelWithProjection, CLIPTokeniz
 
 from diffusers.image_processor import VaeImageProcessor
 from diffusers.loaders import FromSingleFileMixin, LoraLoaderMixin, TextualInversionLoaderMixin
-# from diffusers.models import AutoencoderKL, UNet2DConditionModel
 from diffusers.models import AutoencoderKL, ControlNetModel
 from model.unet_adapter import UNet2DConditionModel
 

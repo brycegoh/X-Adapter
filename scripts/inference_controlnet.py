@@ -13,17 +13,12 @@ from packaging import version
 
 from transformers import CLIPTextModel, CLIPTokenizer, AutoTokenizer, PretrainedConfig, AutoImageProcessor, UperNetForSemanticSegmentation
 
-import diffusers
-from diffusers import AutoencoderKL, DDPMScheduler, StableDiffusionPipeline, UNet2DConditionModel, ControlNetModel, T2IAdapter
-from diffusers.optimization import get_scheduler
-from diffusers.training_utils import EMAModel
-from diffusers.utils import check_min_version, deprecate, is_wandb_available
+from diffusers import AutoencoderKL, DDPMScheduler, UNet2DConditionModel, ControlNetModel, T2IAdapter
 from diffusers.utils.import_utils import is_xformers_available
 
 from model.unet_adapter import UNet2DConditionModel
 from model.adapter import Adapter_XL
 from pipeline.pipeline_sd_xl_adapter_controlnet import StableDiffusionXLAdapterControlnetPipeline
-from controlnet_aux import MidasDetector, CannyDetector
 
 from scripts.utils import str2float
 
@@ -214,13 +209,7 @@ def inference_controlnet(args):
     [92, 0, 255],
 ])
 
-    if args.condition_type == "canny":
-        controlnet_path = args.controlnet_canny_path
-        canny = CannyDetector()
-    elif args.condition_type == "depth":
-        controlnet_path = args.controlnet_depth_path  # todo: haven't defined in args
-        depth = MidasDetector.from_pretrained("lllyasviel/Annotators")
-    elif args.condition_type == "seg":
+    if args.condition_type == "seg":
         controlnet_path = "lllyasviel/sd-controlnet-seg"
         def seg(image):
             image_processor = AutoImageProcessor.from_pretrained("openmmlab/upernet-convnext-small")
@@ -264,13 +253,7 @@ def inference_controlnet(args):
 
     input_image = Image.open(args.input_image_path)
     input_image = input_image.resize((512, 512), Image.LANCZOS)
-    if args.condition_type == "canny":
-        control_image = canny(input_image)
-        control_image.save(f'{args.save_path}/{prompt[:10]}_canny_condition.png')
-    elif args.condition_type == "depth":
-        control_image = depth(input_image)
-        control_image.save(f'{args.save_path}/{prompt[:10]}_depth_condition.png')
-    elif args.condition_type == "seg":
+    if args.condition_type == "seg":
         control_image = seg(input_image)
         control_image.save(f'{args.save_path}/{prompt[:10]}_seg_condition.png')
 

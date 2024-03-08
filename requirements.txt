@@ -1,5 +1,4 @@
 accelerate == 0.18.0
-controlnet_aux == 0.0.7
 opencv_python_headless == 4.8.0.76
 dataclasses == 0.6
 diffusers == 0.20.0
