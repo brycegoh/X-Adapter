@@ -344,7 +344,9 @@ def inference_controlnet(args):
             unet_sd1_5=unet_sd1_5,
             scheduler_sd1_5=noise_scheduler_sd1_5,
             adapter=adapter,
-            controlnet=controlnet
+            controlnet=controlnet,
+            control_guidance_start = args.control_guidance_start,
+            control_guidance_end = args.control_guidance_end,
         )
 
         pipe.enable_model_cpu_offload()

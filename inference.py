@@ -92,6 +92,14 @@ def parse_args(input_args=None):
         "--seed",
         type=int, default=1674753452
     )
+    parser.add_argument(
+        "--control_guidance_start",
+        type=float, default=0.0
+    )
+    parser.add_argument(
+        "--control_guidance_end",
+        type=float, default=1.0
+    )
 
     if input_args is not None:
         args = parser.parse_args(input_args)
