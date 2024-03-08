@@ -1,19 +1,14 @@
 import torch
-import json
-import os
 import numpy as np
-import cv2
-import matplotlib
-from tqdm import tqdm
 from diffusers import DPMSolverMultistepScheduler
 from diffusers.utils import load_image
 from torch import Generator
 from PIL import Image
 from packaging import version
 
-from transformers import CLIPTextModel, CLIPTokenizer, AutoTokenizer, PretrainedConfig, AutoImageProcessor, UperNetForSemanticSegmentation
+from transformers import CLIPTextModel, CLIPTokenizer, AutoTokenizer, PretrainedConfig, SegformerFeatureExtractor, SegformerForSemanticSegmentation
 
-from diffusers import AutoencoderKL, DDPMScheduler, UNet2DConditionModel, ControlNetModel, T2IAdapter
+from diffusers import AutoencoderKL, DDPMScheduler, UNet2DConditionModel, ControlNetModel
 from diffusers.utils.import_utils import is_xformers_available
 
 from model.unet_adapter import UNet2DConditionModel
@@ -218,23 +213,25 @@ def inference_controlnet(args):
     
     if args.condition_type == "seg":
         controlnet_path = "lllyasviel/sd-controlnet-seg"
-        def seg(image):
-            image_processor = AutoImageProcessor.from_pretrained("openmmlab/upernet-convnext-small")
-            image_segmentor = UperNetForSemanticSegmentation.from_pretrained("openmmlab/upernet-convnext-small")
-            pixel_values = image_processor(image, return_tensors="pt").pixel_values
-            with torch.no_grad():
-                outputs = image_segmentor(pixel_values)
-            seg = image_processor.post_process_semantic_segmentation(outputs, target_sizes=[image.size[::-1]])[0]
+        def seg(seg_img):
+            feature_extractor = SegformerFeatureExtractor.from_pretrained("nvidia/segformer-b5-finetuned-ade-640-640")
+            model = SegformerForSemanticSegmentation.from_pretrained("nvidia/segformer-b5-finetuned-ade-640-640")
+            original_size = seg_img.size
+            inputs = feature_extractor(images=seg_img, return_tensors="pt")
+            outputs = model(**inputs)
+            logits = outputs.logits
+            seg = logits.argmax(dim=1)[0]  # Assuming batch size is 1
+            seg = seg.cpu().numpy()
 
-            color_seg = np.zeros((seg.shape[0], seg.shape[1], 3), dtype=np.uint8) # height, width, 3
-
+            # Color mapping
+            color_seg = np.zeros((seg.shape[0], seg.shape[1], 3), dtype=np.uint8)  # height, width, 3
             for label, color in enumerate(palette):
                 color_seg[seg == label, :] = color
-
             color_seg = color_seg.astype(np.uint8)
 
-            image = Image.fromarray(color_seg)
-            return image
+            # Convert to image and save
+            image_seg = Image.fromarray(color_seg).resize(original_size, resample=Image.NEAREST)
+            return image_seg
     else:
         raise NotImplementedError("not implemented yet")
 
