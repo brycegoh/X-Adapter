@@ -257,7 +257,7 @@ def inference_controlnet(args):
     print('successfully load controlnet')
 
     if args.condition_type == "seg":
-        input_image = load_image(args.input_image_path).resize((512, 512), Image.LANCZOS).convert('RGB')
+        input_image = load_image(args.input_image_path)
         control_image = seg(input_image)
         control_image.save(f'{args.save_path}/{prompt[:10]}_seg_condition.png')
 
