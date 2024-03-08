@@ -214,7 +214,6 @@ def inference_controlnet(args):
     if args.condition_type == "seg":
         controlnet_path = "lllyasviel/sd-controlnet-seg"
         def seg(seg_img):
-            print("using segformer")
             feature_extractor = SegformerFeatureExtractor.from_pretrained("nvidia/segformer-b5-finetuned-ade-640-640")
             model = SegformerForSemanticSegmentation.from_pretrained("nvidia/segformer-b5-finetuned-ade-640-640")
             original_size = seg_img.size
@@ -257,7 +256,7 @@ def inference_controlnet(args):
     print('successfully load controlnet')
 
     if args.condition_type == "seg":
-        input_image = load_image(args.input_image_path)
+        input_image = load_image(args.input_image_path).convert("RGB")
         control_image = seg(input_image)
         control_image.save(f'{args.save_path}/{prompt[:10]}_seg_condition.png')
 
