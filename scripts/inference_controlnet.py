@@ -345,8 +345,6 @@ def inference_controlnet(args):
             scheduler_sd1_5=noise_scheduler_sd1_5,
             adapter=adapter,
             controlnet=controlnet,
-            control_guidance_start = args.control_guidance_start,
-            control_guidance_end = args.control_guidance_end,
         )
 
         pipe.enable_model_cpu_offload()
@@ -368,7 +366,10 @@ def inference_controlnet(args):
                                  num_images_per_prompt=1, generator=gen,
                                  controlnet_conditioning_scale=controlnet_condition_scale,
                                  adapter_condition_scale=adapter_condition_scale,
-                                 adapter_guidance_start=adapter_guidance_start).images[0]
+                                 adapter_guidance_start=adapter_guidance_start,
+                                 control_guidance_start = args.control_guidance_start,
+                                 control_guidance_end = args.control_guidance_end,
+                            ).images[0]
                         img.save(
                             f"{args.save_path}/{prompt[:10]}_{i}_ccs_{controlnet_condition_scale:.2f}_ags_{adapter_guidance_start:.2f}_acs_{adapter_condition_scale:.2f}.png")
 

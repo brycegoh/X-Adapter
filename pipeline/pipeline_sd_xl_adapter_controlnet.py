@@ -144,8 +144,6 @@ class StableDiffusionXLAdapterControlnetPipeline(DiffusionPipeline, FromSingleFi
         controlnet: ControlNetModel,
         force_zeros_for_empty_prompt: bool = True,
         add_watermarker: Optional[bool] = None,
-        control_guidance_start: Union[float, List[float]] = 0.0,
-        control_guidance_end: Union[float, List[float]] = 1.0,
     ):
         super().__init__()
 
@@ -176,9 +174,6 @@ class StableDiffusionXLAdapterControlnetPipeline(DiffusionPipeline, FromSingleFi
         self.image_processor_sd1_5 = VaeImageProcessor(vae_scale_factor=self.vae_scale_factor_sd1_5)
 
         add_watermarker = add_watermarker if add_watermarker is not None else is_invisible_watermark_available()
-
-        self.control_guidance_start = control_guidance_start
-        self.control_guidance_end = control_guidance_end
 
         if add_watermarker:
             self.watermark = StableDiffusionXLWatermarker()
