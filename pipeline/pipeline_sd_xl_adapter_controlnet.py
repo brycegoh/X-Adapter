@@ -751,8 +751,6 @@ class StableDiffusionXLAdapterControlnetPipeline(DiffusionPipeline, FromSingleFi
         skip_adapter_steps = int(adapter_guidance_start * num_inference_steps)
 
         # align format for control guidance
-        control_guidance_start = self.control_guidance_start 
-        control_guidance_end = self.control_guidance_end
         if not isinstance(control_guidance_start, list) and isinstance(control_guidance_end, list):
             control_guidance_start = len(control_guidance_end) * [control_guidance_start]
         elif not isinstance(control_guidance_end, list) and isinstance(control_guidance_start, list):
