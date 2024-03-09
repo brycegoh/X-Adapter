@@ -366,7 +366,7 @@ def inference_controlnet(args):
                             pipe(prompt=prompt, negative_prompt=negative_prompt, prompt_sd1_5=prompt_sd1_5,
                                  width=1024, height=1024, height_sd1_5=512, width_sd1_5=512,
                                  image=control_image,
-                                 num_inference_steps=args.num_inference_steps, guidance_scale=args.guidance_scale,
+                                 num_inference_steps=args.num_inference_steps,
                                  num_images_per_prompt=1, generator=gen,
                                  controlnet_conditioning_scale=controlnet_condition_scale,
                                  adapter_condition_scale=adapter_condition_scale,
