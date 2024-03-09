@@ -85,10 +85,6 @@ def parse_args(input_args=None):
         type=int, default=50
     )
     parser.add_argument(
-        "--guidance_scale",
-        type=float, default=7.5
-    )
-    parser.add_argument(
         "--seed",
         type=int, default=1674753452
     )
