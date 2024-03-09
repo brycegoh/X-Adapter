@@ -104,6 +104,14 @@ def parse_args(input_args=None):
         "--guidance_scale",
         type=float, default=5.0
     )
+    parser.add_argument(
+        "--resolution",
+        type=str, default="1024 1024"
+    )
+    parser.add_argument(
+        "--denoising_end",
+        type=float, default=None
+    )
 
     if input_args is not None:
         args = parser.parse_args(input_args)

@@ -1,6 +1,6 @@
 import torch
 import numpy as np
-from diffusers import DPMSolverMultistepScheduler
+from diffusers import DPMSolverMultistepScheduler, StableDiffusionXLImg2ImgPipeline
 from diffusers.utils import load_image
 from torch import Generator
 from PIL import Image
@@ -328,6 +328,10 @@ def inference_controlnet(args):
 
 
     with torch.inference_mode():
+        refiner = StableDiffusionXLImg2ImgPipeline.from_pretrained(
+            "stabilityai/stable-diffusion-xl-refiner-1.0", torch_dtype=torch.float16, use_safetensors=True, variant="fp16"
+        ).to("cuda")
+
         gen = Generator("cuda")
         gen.manual_seed(args.seed)
         pipe = StableDiffusionXLAdapterControlnetPipeline(
@@ -370,6 +374,15 @@ def inference_controlnet(args):
                                  control_guidance_start = args.control_guidance_start,
                                  control_guidance_end = args.control_guidance_end,
                                  guidance_scale = args.guidance_scale,
+                                 output_type= "pil" if args.denoising_end is None else "latent",
+                                 denoising_end= None if args.denoising_end is None else args.denoising_end,
+                            ).images[0]
+                        if args.denoising_end is not None:
+                            img = refiner(
+                                prompt=prompt,
+                                num_inference_steps=args.num_inference_steps,
+                                denoising_start=args.denoising_end,
+                                image=img,
                             ).images[0]
                         img.save(
                             f"{args.save_path}/{prompt[:10]}_{i}_ccs_{controlnet_condition_scale:.2f}_ags_{adapter_guidance_start:.2f}_acs_{adapter_condition_scale:.2f}.png")
