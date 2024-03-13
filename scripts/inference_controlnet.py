@@ -6,7 +6,7 @@ from torch import Generator
 from PIL import Image
 from packaging import version
 
-from transformers import CLIPTextModel, CLIPTokenizer, AutoTokenizer, PretrainedConfig, SegformerFeatureExtractor, SegformerForSemanticSegmentation
+from transformers import CLIPTextModel, CLIPTokenizer, AutoTokenizer, PretrainedConfig, OneFormerProcessor, OneFormerForUniversalSegmentation
 
 from diffusers import AutoencoderKL, DDPMScheduler, UNet2DConditionModel, ControlNetModel
 from diffusers.utils.import_utils import is_xformers_available
@@ -214,24 +214,31 @@ def inference_controlnet(args):
     if args.condition_type == "seg":
         controlnet_path = "lllyasviel/sd-controlnet-seg"
         def seg(seg_img):
-            feature_extractor = SegformerFeatureExtractor.from_pretrained("nvidia/segformer-b5-finetuned-ade-640-640")
-            model = SegformerForSemanticSegmentation.from_pretrained("nvidia/segformer-b5-finetuned-ade-640-640")
-            original_size = seg_img.size
-            inputs = feature_extractor(images=seg_img, return_tensors="pt")
-            outputs = model(**inputs)
-            logits = outputs.logits
-            seg = logits.argmax(dim=1)[0]  # Assuming batch size is 1
-            seg = seg.cpu().numpy()
+            processor = OneFormerProcessor.from_pretrained("shi-labs/oneformer_ade20k_swin_large")
+            model = OneFormerForUniversalSegmentation.from_pretrained("shi-labs/oneformer_ade20k_swin_large")
+            semantic_inputs = processor(images=seg_img, task_inputs=["semantic"], return_tensors="pt")
+            semantic_outputs = model(**semantic_inputs)
 
-            # Color mapping
-            color_seg = np.zeros((seg.shape[0], seg.shape[1], 3), dtype=np.uint8)  # height, width, 3
-            for label, color in enumerate(palette):
-                color_seg[seg == label, :] = color
-            color_seg = color_seg.astype(np.uint8)
+            predicted_semantic_map = processor.post_process_semantic_segmentation(semantic_outputs, target_sizes=[image.size[::-1]])[0]
+            segmentation_array = predicted_semantic_map.numpy()
 
-            # Convert to image and save
-            image_seg = Image.fromarray(color_seg).resize(original_size, resample=Image.NEAREST)
-            return image_seg
+            height, width = segmentation_array.shape
+            rgb_segmentation_array = np.zeros((height, width, 3), dtype=np.uint8)
+
+            # Map each label in segmentation_array to its corresponding RGB color in color_palette
+            for y in range(height):
+                for x in range(width):
+                    label = segmentation_array[y, x]
+                    # Ensure the label is within the bounds of your palette
+                    if label < len(palette):
+                        rgb_segmentation_array[y, x] = palette[label]
+                    else:
+                        # Handle out-of-palette labels, if any, e.g., by setting them to black or another default color
+                        rgb_segmentation_array[y, x] = [0, 0, 0]  # Default color, e.g., black
+
+            # Convert the RGB array to an image
+            segmentation_image_colored = Image.fromarray(rgb_segmentation_array)
+            return segmentation_image_colored
     else:
         raise NotImplementedError("not implemented yet")
 
@@ -259,6 +266,7 @@ def inference_controlnet(args):
         input_image = load_image(args.input_image_path).convert("RGB")
         control_image = seg(input_image)
         control_image.save(f'{args.save_path}/{prompt[:10]}_seg_condition.png')
+        print("saved conditional image")
 
     # load adapter
     adapter = Adapter_XL()
