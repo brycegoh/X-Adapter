@@ -219,7 +219,7 @@ def inference_controlnet(args):
             semantic_inputs = processor(images=seg_img, task_inputs=["semantic"], return_tensors="pt")
             semantic_outputs = model(**semantic_inputs)
 
-            predicted_semantic_map = processor.post_process_semantic_segmentation(semantic_outputs, target_sizes=[image.size[::-1]])[0]
+            predicted_semantic_map = processor.post_process_semantic_segmentation(semantic_outputs, target_sizes=[seg_img.size[::-1]])[0]
             segmentation_array = predicted_semantic_map.numpy()
 
             height, width = segmentation_array.shape
