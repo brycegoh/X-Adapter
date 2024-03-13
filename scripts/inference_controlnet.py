@@ -328,10 +328,11 @@ def inference_controlnet(args):
 
 
     with torch.inference_mode():
-        refiner = StableDiffusionXLImg2ImgPipeline.from_pretrained(
-            "stabilityai/stable-diffusion-xl-refiner-1.0", torch_dtype=torch.float16, use_safetensors=True, variant="fp16"
-        )
-        refiner.enable_model_cpu_offload()
+        if args.denoising_end is not None:
+            refiner = StableDiffusionXLImg2ImgPipeline.from_pretrained(
+                "stabilityai/stable-diffusion-xl-refiner-1.0", torch_dtype=torch.float16, use_safetensors=True, variant="fp16"
+            )
+            refiner.enable_model_cpu_offload()
 
         gen = Generator("cuda")
         gen.manual_seed(args.seed)
